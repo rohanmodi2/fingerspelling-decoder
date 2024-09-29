@@ -22,7 +22,7 @@ if __name__ == '__main__':
     import warnings
     warnings.filterwarnings("ignore")
 
-    from new_decoder import multidimensional_viterbi
+    from decoder import multidimensional_viterbi
     from read_hmm import states_, prior_probs_, transition_probs_, emission_paras_
 
     vector = read_vector('/Users/rohan/Downloads/1960228537')
@@ -48,16 +48,26 @@ if __name__ == '__main__':
 1963838355:
 - htk: 0zxsutoksixmons1
 - new model: 0xsvxoksixmonks
--- score: 0.7741935483870968
+- actual: 0the_assault_took_six_months1
+-- score (htk): 0.7741935483870968
+-- score (actual): 0.5
+-- htk / actual score: 0.6222222222222222
 
 196531928:
 - htk: 0esixsrxhtdsndeusos1
 - new model: emixoarxhnmanomvmsonsb
--- score: 0.47619047619047616
+- actual: 0six_daughters_and_seven_sons1
+-- score (htk): 0.47619047619047616
+-- score (actual): 0.4230769230769231
+-- htk / actual score: 0.56
 
 1960228537:
 - htk: 0hdsyd1
 - new model: 
--- score: 0.5454545454545454
+- actual: 0her_majesty_visited_our_country1
+-- score (htk): 0.5454545454545454
+-- score (actual): 0.21621621621621623
+-- htk / actual score: 0.3
+
 """
 

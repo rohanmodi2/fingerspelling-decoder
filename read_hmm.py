@@ -90,7 +90,8 @@ emission_paras_mean_ = {}
 emission_paras_variance_ = {}
 transition_probs_ = {}
 prior_probs_ = {}
-
+path_ = "/Users/rohan/Downloads/6state_uniletter_1mix.tar.gz/models/hmm0.19/newMacros"
+read_file_new(path_, states_, emission_paras_mean_, emission_paras_variance_, transition_probs_)
 
 for state_ in states_:
     if state_[-1] == '2':
@@ -118,6 +119,5 @@ for state in states_:
 
 import torch
 prior_probs_tensor = torch.Tensor(prior_probs_list)
-
 
 
