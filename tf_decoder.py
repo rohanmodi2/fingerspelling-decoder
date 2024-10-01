@@ -29,19 +29,12 @@ class HMMModel(tf.keras.Model):
 
     @tf.function
     def call(self, evidence_vector):
+        evidence_vector = tf.gather(evidence_vector, 0)
         return self.multidimensional_viterbi(evidence_vector,
                                              self.states,
                                              self.prior_probs,
                                              self.transition_probs,
                                              self.emission_paras)
-    @tf.function
-    def gaussian_prob(self, x, para_tuple):
-            if para_tuple[0] is None or para_tuple[1] is None:
-                return tf.constant(0.0)
-            mean, std = para_tuple
-            gaussian_percentile = (2 * math.pi * std**2)**-0.5 * \
-                                tf.math.exp(-(x - mean)**2 / (2 * std**2))
-            return gaussian_percentile
 
     @tf.function
     def multidimensional_viterbi(self, evidence_vector, states, prior_probs,
@@ -55,7 +48,7 @@ class HMMModel(tf.keras.Model):
                 nl = tf.constant([])
 
                 p = (2 * math.pi * emission_paras[:, :, 1]) ** (-0.5) * \
-                tf.exp(-(evidence_vector[0] - emission_paras[:, :, 0])**2 / (2 * emission_paras[:, :, 1]**2))
+                tf.exp(-(evidence_vector[0] - emission_paras[:, :, 0])**2 / (2 * emission_paras[:, :, 1]))
                 result = tf.reduce_sum(tf.math.log(p), axis=1, keepdims=True)
                 prior_ = tf.expand_dims(tf.math.log(prior_probs), axis=1)
                 result = prior_ + result
@@ -83,7 +76,7 @@ class HMMModel(tf.keras.Model):
                             prev_prob = nl[j][i - 1]
                             prev_state = j
                         p = (2 * math.pi * emission_paras[:, :, 1]) ** (-0.5) * \
-                        tf.exp(-(evidence_vector[i] - emission_paras[:, :, 0])**2 / (2 * emission_paras[:, :, 1]**2))
+                        tf.exp(-(evidence_vector[i] - emission_paras[:, :, 0])**2 / (2 * emission_paras[:, :, 1]))
                         log_p = tf.keras.ops.nan_to_num(
                             tf.math.log(p), nan=0.0, posinf=None, neginf=None
                         )    
@@ -148,10 +141,10 @@ def convert_model():
 
     model = HMMModel(states=states_, prior_probs=prior_probs_tensor, transition_probs=transition_probs_, emission_paras=emission_paras_)
 
-    input_shape = (10, 20)
+    input_shape = (1, 10, 20)
     model.build(input_shape)
 
-    most_likely_sequence1 = model(evidence_vector=torch.tensor(vector[20:30]))
+    most_likely_sequence1 = model(evidence_vector=torch.tensor([vector[20:30]]))
 
     model.export("saved_model")
 
@@ -168,7 +161,7 @@ def convert_model():
     tf.print(most_likely_sequence1)
 
 
-    most_likely_sequence1 = model(evidence_vector=torch.tensor(vector[0:20]))
+    most_likely_sequence1 = model(evidence_vector=torch.tensor([vector[0:10]]))
     print("most_likely_sequence:")
     print(most_likely_sequence1)
 
