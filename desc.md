@@ -1,29 +1,29 @@
-## TFLite Model Input and Output Description
+## TFLite Model Description
 
 ### Input
-
-- **Name**: serving_default_args_0:0
-- **Index**: 0
-- **Shape**: (1, 40, 20)
-- **Shape Signature**: (-1, 40, 20)
-- **Data Type**: float32
-- **Quantization**: None
-  - **Quantization Parameters**:
-    - Scales: []
-    - Zero Points: []
-
+```
+Name: serving_default_args_0:0
+Index: 0
+Shape: (1, 40, 20)
+Shape Signature: (-1, 40, 20)
+Data Type: float32
+Quantization: None
+  Quantization Parameters:
+    Scales: []
+    Zero Points: []
+```
 ### Output
-
-- **Name**: PartitionedCall_1:0
-- **Index**: 44
-- **Shape**: (1)
-- **Shape Signature**: (-1)
-- **Data Type**: int32
-- **Quantization**: None
-  - **Quantization Parameters**:
-    - Scales: []
-    - Zero Points: []
-
+```
+Name: PartitionedCall_1:0
+Index: 44
+Shape: (1)
+Shape Signature: (-1)
+Data Type: int32
+Quantization: None
+  Quantization Parameters**:
+    Scales: []
+    Zero Points: []
+```
 #### Example Input
 
 ```python
