@@ -19,7 +19,7 @@ def tf_convert():
   converter.allow_custom_ops = True
   converter.optimizations = [tf.lite.Optimize.DEFAULT]
   converter.target_spec.supported_types = [tf.float32]
-  converter.experimental_fixed_input_shape = [10, 20]  # For a fixed shape
+  converter.experimental_fixed_input_shape = [60, 20]  # For a fixed shape
 
   tflite_model = converter.convert()
 
@@ -43,14 +43,29 @@ def tflite_predict(evidence_vector):
   interpreter.invoke()
 
   output_data = interpreter.get_tensor(output_details[0]['index'])
-  return output_data
+
+  from read_hmm import states_
+  result = []
+  for n in output_data:
+    result.append(states_[n])
+
+  return result
 
 
-evidence_vector = vector[:40]
+def python_predict(evidence_vector):
+  from read_hmm import states_, prior_probs_, transition_probs_, emission_paras_
+  from decoder import multidimensional_viterbi
+  return multidimensional_viterbi(evidence_vector, states_, prior_probs_,
+                                  transition_probs_, emission_paras_, 20)
+  
+
+
+evidence_vector = vector[:60]
 # print(tf_predict(evidence_vector))
-tf_convert()
+# tf_convert()
 time_ = time.time()
-print(tf.config.list_physical_devices('CPU'))
-print(tflite_predict(evidence_vector))
-print(tf.config.list_physical_devices('GPU'))
+print("tflite output: \n", tflite_predict(evidence_vector))
+print("python output: \n", python_predict(evidence_vector))
+# print(tf.config.list_physical_devices('CPU'))
+# print(tf.config.list_physical_devices('GPU'))
 print(time.time() - time_)
