@@ -2,8 +2,8 @@ import math
 import numpy as np
 
 # define global variable transition_probs
-transition_probs = {}
-states = []
+from read_hmm import transition_probs_ as transition_probs, states_ as states, prior_probs_ as prior_probs, \
+    emission_paras_ as emission_paras, transition_defs_ as transition_defs
 
 
 def get_transition_prob(state1, state2):
@@ -30,17 +30,21 @@ def get_transition_prob(state1, state2):
     ## for later, check number of states in sil0, sil1 and change above if statements
     state_num1 = int(state1[-1])
     state_num2 = int(state2[-1])
-    if state_num1 == state_num2:
-        return transition_probs[state1][state2]
+    if state1[:-1] == state2[:-1]:
+        print(transition_probs.keys())
+        print("END KEYS")
+        prob_def = transition_probs[state1[:-1]]
+        probs = transition_defs[prob_def]
+        return probs[state_num1][state_num2]
     else:
         if 0 <= state_num1 <= 4 or 1 <= state_num2 <= 5:
             return 0
         elif state_num1 == 5 and state_num2 == 0:
-            if len(state1) == 3 and state1[1] == "-":
+            if len(state1) == 4 and state1[1] == "-":
                 return 0
-            if len(state1) == 3 and state1[1] == "+":
-                if not (len(state2) == 5 and state2[1] == "-" and state2[3] == "+" and state2[0] == state1[0] and state2[2] == state1[2]) and \
-                    not (len(state2) == 3 and state2[1] == "-" and state2[0] == state1[0] and state2[2] == state1[2]):
+            if len(state1) == 4 and state1[1] == "+":
+                if not (len(state2) == 6 and state2[1] == "-" and state2[3] == "+" and state2[0] == state1[0] and state2[2] == state1[2]) and \
+                    not (len(state2) == 4 and state2[1] == "-" and state2[0] == state1[0] and state2[2] == state1[2]):
                     return 0
                 else:
                     count = 0
@@ -49,19 +53,19 @@ def get_transition_prob(state1, state2):
                             (len(s) == 3 and s[1] == "-" and s[0] == state1[0] and s[2] == state1[2]):
                             count += 1
                     return 1/count
-            elif len(state1) == 5 and state1[1] == "-" and state1[3] == "+":
-                if not (len(state2) == 5 and state2[1] == '-' and state2[3] == "+" and state2[0] == state1[2] and state2[2] == state1[4]) and \
-                    (len(state2) == 3 and state2[1] == "-" and state2[0] == state1[2] and state2[2] == state1[4]):
+            elif len(state1) == 6 and state1[1] == "-" and state1[3] == "+":
+                if not (len(state2) == 6 and state2[1] == '-' and state2[3] == "+" and state2[0] == state1[2] and state2[2] == state1[4]) and \
+                    (len(state2) == 6 and state2[1] == "-" and state2[0] == state1[2] and state2[2] == state1[4]):
                     return 0
                 else:
                     count = 0
                     for s in states:
-                        if (len(s) == 5 and s[1] == "-" and s[3] == "+" and s[0] == state1[2] and s[2] == state1[4]) or \
-                            (len(s) == 3 and s[1] == "-" and s[0] == state1[2] and s[2] == state1[4]):
+                        if (len(s) == 6 and s[1] == "-" and s[3] == "+" and s[0] == state1[2] and s[2] == state1[4]) or \
+                            (len(s) == 4 and s[1] == "-" and s[0] == state1[2] and s[2] == state1[4]):
                             count += 1
                     return 1/count
 
-    input(f"transition_prob not found for state 1 '{state1}' and state2 '{state2}")
+    input(f"transition_prob not found for state 1 '{state1}' and state2 '{state2}'")
 
 
 def gaussian_prob(x, para_tuple):
@@ -159,35 +163,11 @@ def multidimensional_viterbi(evidence_vector, states, prior_probs,
 
 
 if __name__ == "__main__":
-    states_ = ['a1', 'a2', 'a3', 'b1', 'b2', 'b3', 'c1', 'c2']
-    prior_probs_ = {}
-    for state in states_:
-        if state[-1] == '1':
-            prior_probs_[state] = 1/3
-        else:
-            prior_probs_[state] = 0
-    transition_probs_ = {}
-    for state in states_:
-        transition_probs_[state] = {}
-        for state1 in states_:
-            if state1[0] == state[0]:
-                transition_probs_[state][state1] = 0.33
-            else:
-                transition_probs_[state][state1] = 0
-    emission_paras_ = {
-        'a1': [(1.0,1.0), (1.0,1.0), (1.0,1.0)],
-        'a2': [(1.0,1.0), (1.0,1.0), (1.0,1.0)],
-        'a3': [(1.0,1), (1.0,1), (1.0,1)],
-        'b1': [(1.0,1), (1.0,1), (1.0,1)],
-        'b2': [(1.0,1), (1.0,1), (1.0,1)],
-        'b3': [(1.0,1), (1.0,1), (1.0,1)],
-        'c1': [(5.0,1), (1.0,1), (3.0,1)],
-        'c2': [(10.0,1), (1.0,1), (3.0,1)]  
-    }
 
     vector = [(5.0,1,3), (5.0,1,3), (5,1,3), (10,1,3), (10,1,3), (10,1,3), (10,1,3)]
+    from read_vector import read_vector
+    vector = read_vector('/Users/rohan/Downloads/1963838355')
 
-    prior_probs_tensor = {'a1':0.33, 'a2':0, 'a3':0, 'b1':0.33, 'b2':0, 'b3':0, 'c1':0.33, 'c2':0}
-    r = multidimensional_viterbi(evidence_vector=vector,states=states_, prior_probs=prior_probs_tensor, transition_probs=transition_probs_, emission_paras=emission_paras_)
+    r = multidimensional_viterbi(evidence_vector=vector,states=states, prior_probs=prior_probs, transition_probs=transition_probs, emission_paras=emission_paras)
 
     print(r)
