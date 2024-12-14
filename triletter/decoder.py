@@ -54,7 +54,9 @@ def get_transition_prob(state1, state2):
                             count += 1
                     return 1/count
             elif len(state1) == 5 and state1[1] == "-" and state1[3] == "+":
-                pass
+                if not (len(state2) == 5 and state2[1] == '-' and state2[3] == "+" and state2[0] == state1[2] and state2[2] == state1[4]) and \
+                    (len(state2) == 3 and state2[1] == "-" and state2[0] == state1[2] and state2[2] == state1[4]):
+                    return 0
 
 
 
