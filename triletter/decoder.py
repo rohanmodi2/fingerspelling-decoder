@@ -5,10 +5,6 @@ import numpy as np
 transition_probs = {}
 states = []
 
-def get_state_format(state1, state2):
-    if len(state1)
-    input("state format not found. state:", state)
-
 
 def get_transition_prob(state1, state2):
     # can be further optimized if functionality is correct (by storing pre-defined lists or hashmaps)
@@ -57,8 +53,13 @@ def get_transition_prob(state1, state2):
                 if not (len(state2) == 5 and state2[1] == '-' and state2[3] == "+" and state2[0] == state1[2] and state2[2] == state1[4]) and \
                     (len(state2) == 3 and state2[1] == "-" and state2[0] == state1[2] and state2[2] == state1[4]):
                     return 0
-
-
+                else:
+                    count = 0
+                    for s in states:
+                        if (len(s) == 5 and s[1] == "-" and s[3] == "+" and s[0] == state1[2] and s[2] == state1[4]) or \
+                            (len(s) == 3 and s[1] == "-" and s[0] == state1[2] and s[2] == state1[4]):
+                            count += 1
+                    return 1/count
 
     input(f"transition_prob not found for state 1 '{state1}' and state2 '{state2}")
 
@@ -87,9 +88,7 @@ def multidimensional_viterbi(evidence_vector, states, prior_probs,
     for i in range(len(states)):
         prod = np.log(1)
         for z in range(ndim):
-            # prod = prod * gaussian_prob(evidence_vector[0][z], emission_paras[states[i]][z])
             prod = prod + np.log(gaussian_prob(evidence_vector[0][z], emission_paras[states[i]][z]))
-        # nl.append([prior_probs[states[i]] * prod] + [0] * (len(evidence_vector)-1))
         nl.append([np.log(prior_probs[states[i]]) + prod] + [0] * (len(evidence_vector) - 1))
 
     for i in range(1, len(evidence_vector)):
@@ -100,10 +99,9 @@ def multidimensional_viterbi(evidence_vector, states, prior_probs,
                 best_prev_prob = None
                 k_new = None
                 for k in range(len(states)):
-                    # if states[j] in transition_probs[states[k]] and nl[k][i-1]*transition_probs[states[k]][states[j]] > max_val:
-                    if states[j] in transition_probs[states[k]] and (nl[k][i-1] + np.log(transition_probs[states[k]][states[j]])) >= max_val:
-                        # max_val = nl[k][i-1] * transition_probs[states[k]][states[j]]
-                        max_val = nl[k][i - 1] + np.log(transition_probs[states[k]][states[j]])
+                    # if states[j] in transition_probs[states[k]] and (nl[k][i-1] + np.log(transition_probs[states[k]][states[j]])) >= max_val:
+                    if get_transition_prob(states[k], states[j]) > 0 and (nl[k][i-1] + np.log(get_transition_prob(states[k], states[j]))) >= max_val:
+                        max_val = nl[k][i - 1] + np.log(get_transition_prob(states[k], states[j]))
                         best_prev_prob = nl[k][i-1]
                         k_new = k
                 prev_prob = best_prev_prob
@@ -113,10 +111,8 @@ def multidimensional_viterbi(evidence_vector, states, prior_probs,
                 prev_state = states[j]
             a = np.log(1)
             for z in range(ndim):
-                # a = a * gaussian_prob(evidence_vector[i][z], emission_paras[state][z])
                 a = a + np.log(gaussian_prob(evidence_vector[i][z], emission_paras[state][z]))
-            # nl[j][i] = prev_prob * a * transition_probs[prev_state][state]
-            nl[j][i] = prev_prob + a + np.log(transition_probs[prev_state][state])
+            nl[j][i] = prev_prob + a + np.log(get_transition_prob(prev_state, state))
 
     new_s = []
     seq = []
@@ -124,7 +120,6 @@ def multidimensional_viterbi(evidence_vector, states, prior_probs,
     highest_prob_index = None
     for j in range(len(states)):
         if highest_prob <= nl[j][-1]:
-            # if (states[j] in ['sil03', 'sil13', '_2'] or states[j][-1] == '7') and highest_prob <= nl[j][-1]:
             if highest_prob <= nl[j][-1]:
 
                 highest_prob = nl[j][-1]
@@ -141,12 +136,10 @@ def multidimensional_viterbi(evidence_vector, states, prior_probs,
         ni = None
 
         for j in range(len(states)):
-            if sequence[0] not in transition_probs[states[j]]:
+            if get_transition_prob(states[j], sequence[0]) == 0:
                 continue
-            # if nl[j][i]*transition_probs[states[j]][sequence[0]] > highest_prob:
-            if (nl[j][i] + np.log(transition_probs[states[j]][sequence[0]])) > highest_prob:
-                # highest_prob = nl[j][i]*transition_probs[states[j]][sequence[0]]
-                highest_prob = nl[j][i] + np.log(transition_probs[states[j]][sequence[0]])
+            if (nl[j][i] + np.log(get_transition_prob(states[j], sequence[0]))) > highest_prob:
+                highest_prob = nl[j][i] + np.log(get_transition_prob(states[j], sequence[0]))
                 new_highest_prob = nl[j][i]
                 best_state = states[j]
                 change_j = j
