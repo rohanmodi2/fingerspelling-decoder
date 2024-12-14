@@ -24,15 +24,16 @@ def get_transition_prob(state1, state2):
     #       if format1 is "a-b+c":
     #           if format2 is not "b-c+d" or "b-c":
     #               return 0
-    #           else:
+    #           elif (format2 is "b-c+d" or "b-c"):
     #               calculate total number of "b-c+d" and "b-c" options for all c
     #               return 1/calculated_number
+    #           elif format1 is "a":
+    #               return 0
     ## for later, check number of states in sil0, sil1 and change above if statements
+    print("transition:", state1, state2)
     state_num1 = int(state1[-1])
     state_num2 = int(state2[-1])
     if state1[:-1] == state2[:-1]:
-        print(transition_probs.keys())
-        print("END KEYS")
         prob_def = transition_probs[state1[:-1]]
         probs = transition_defs[prob_def]
         return probs[state_num1][state_num2]
@@ -40,6 +41,8 @@ def get_transition_prob(state1, state2):
         if 0 <= state_num1 <= 4 or 1 <= state_num2 <= 5:
             return 0
         elif state_num1 == 5 and state_num2 == 0:
+            if len(state1) == 2:
+                return 0
             if len(state1) == 4 and state1[1] == "-":
                 return 0
             if len(state1) == 4 and state1[1] == "+":
@@ -49,8 +52,8 @@ def get_transition_prob(state1, state2):
                 else:
                     count = 0
                     for s in states:
-                        if (len(s) == 5 and s[1] == "-" and s[3] == "+" and s[0] == state1[0] and s[2] == state1[2]) or \
-                            (len(s) == 3 and s[1] == "-" and s[0] == state1[0] and s[2] == state1[2]):
+                        if (len(s) == 6 and s[1] == "-" and s[3] == "+" and s[0] == state1[0] and s[2] == state1[2]) or \
+                            (len(s) == 4 and s[1] == "-" and s[0] == state1[0] and s[2] == state1[2]):
                             count += 1
                     return 1/count
             elif len(state1) == 6 and state1[1] == "-" and state1[3] == "+":
@@ -167,7 +170,7 @@ if __name__ == "__main__":
     vector = [(5.0,1,3), (5.0,1,3), (5,1,3), (10,1,3), (10,1,3), (10,1,3), (10,1,3)]
     from read_vector import read_vector
     vector = read_vector('/Users/rohan/Downloads/1963838355')
-
+    vector = vector[:5]
     r = multidimensional_viterbi(evidence_vector=vector,states=states, prior_probs=prior_probs, transition_probs=transition_probs, emission_paras=emission_paras)
 
     print(r)
